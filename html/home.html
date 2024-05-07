@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDo : Home</title>
+</head>
+
+<body>
+    <div class="w-full shadow-lg">
+        <div class="container py-3 w-full flex items-center justify-between">
+            <div class="flex items-center gap-10">
+                <a href="/" title="ToDo Home"
+                    class="uppercase text-3xl font-bold bg-primary text-white p-2 rounded-lg">my todo</a>
+                <ul class="flex items-center gap-4 uppercase font-semibold">
+                    <li class="transition-all duration-300 hover:text-primary/90">
+                        <a href="/">home</a>
+                    </li>
+                    <li class="transition-all duration-300 hover:text-primary/90">
+                        <a href="/about">about</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="flex items-center gap-4">
+                <a id="profile_name" href="/"
+                    class="flex items-center justify-center p-2 uppercase font-bold bg-primary text-white rounded-lg"></a>
+            </div>
+        </div>
+    </div>
+    <div class="w-[70%] mx-auto my-4">
+        <form id="ToDoForm" class="flex flex-col items-center justify-between w-full p-5rounded-md">
+            <h1 class="text-center w-full uppercase text-3xl font-bold">add todo</h1>
+            <div class="flex flex-col items-center w-full my-4 gap-5">
+                <div class="flex flex-col gap-2 w-full">
+                    <label for="title" class="uppercase text-xs cursor-pointer font-semibold">title</label>
+                    <input id="title" type="text" placeholder="Enter ToDo Title"
+                        class="px-3 py-2 outline-none border border-gray-300 focus:border-primary rounded-md" />
+                </div>
+                <div class="flex flex-col gap-2 w-full">
+                    <label for="description" class="uppercase text-xs cursor-pointer font-semibold">description</label>
+                    <input id="description" type="text" placeholder="Enter ToDo Description"
+                        class="px-3 py-2 outline-none border border-gray-300 focus:border-primary rounded-md" />
+                </div>
+            </div>
+            <button type="submit"
+                class="flex items-center justify-center w-full py-3 bg-primary text-white uppercase font-bold rounded-md">
+                Add
+            </button>
+        </form>
+        <div id="todos">
+            <div id="todoCard"
+                class="hidden w-full justify-center items-center p-2 rounded-lg border border-primary my-4">
+                <div class="flex w-full gap-4">
+                    <div class="flex flex-col justify-between w-[90%]">
+                        <h1 class="text-justify font-bold uppercase text-2xl"></h1>
+                        <p class="text-justify uppercase"></p>
+                    </div>
+                    <div class="flex flex-col justify-between">
+                        <span></span>
+                        <button class="bg-red-600 text-white px-4 py-2 rounded-lg caption-top uppercase">delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const res = await fetch("/me", {
+            method: "GET",
+        });
+        const userData = await res.json()
+        document.getElementById("profile_name").innerHTML = userData?.user?.name
+
+        document.getElementById("ToDoForm").addEventListener("submit", async (event) => {
+            event.preventDefault()
+            const title = document.getElementById("title").value
+            const description = document.getElementById("description").value
+            const res = await fetch("/todo/add", {
+                method: "POST",
+                body: JSON.stringify({ title, description }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            const data = await res.json()
+            alert(data.message)
+            location.reload()
+        })
+        const todosContainer = document.getElementById("todos");
+        userData?.user?.tasks?.forEach((task) => {
+            const todoCard = document.getElementById("todoCard").cloneNode(true);
+            todoCard.querySelector("h1").textContent = task.title;
+            todoCard.querySelector("p").textContent = task.desc;
+            todoCard.querySelector("span").textContent = task.createdAt?.split("T")[0];
+            todosContainer.appendChild(todoCard);
+            todoCard.classList.remove("hidden");
+        });
+    })
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    primary: "rgb(59 130 246)"
+                },
+                container: {
+                    padding: {
+                        DEFAULT: "1rem",
+                        sm: "3rem"
+                    }
+                }
+            }
+        }
+    }
+</script>
+
+</html>
