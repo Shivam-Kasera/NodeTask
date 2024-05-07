@@ -7,12 +7,14 @@ import cookieParser from "cookie-parser";
 import { database_connection } from "./database_connection.js";
 import { User } from "./database_model.js"
 import { compare, hash } from "bcrypt";
+import { createProxyMiddleware } from "http-proxy-middleware"
 
 dotenv.config({ path: "./config.env" });
 
 const __dirname = path.dirname(import.meta.url).split(":///")[1]
 database_connection()
 const app = express();
+app.use('/api', createProxyMiddleware({ target: 'http://localhost:3001', changeOrigin: true }));
 app.use(express.json())
 app.use(urlencoded({ extended: true }))
 app.use(cookieParser())
